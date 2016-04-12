@@ -191,14 +191,33 @@ float raw_Ki, raw_Kd;
 static void lcd_goto_menu(menuFunc_t menu, const uint32_t encoder=0, const bool feedback=true) {
   if (currentMenu != menu) {
     currentMenu = menu;
-    encoderPosition = encoder;
-    if (feedback) lcd_quick_feedback();
+    lcdDrawUpdate = 2;
+
+    #if defined(NEWPANEL)
+      encoderPosition = encoder;
+      if (feedback) lcd_quick_feedback();
+    #endif
 
     // For LCD_PROGRESS_BAR re-initialize the custom characters
     #if defined(LCD_PROGRESS_BAR) && defined(SDSUPPORT)
       lcd_set_custom_characters(menu == lcd_status_screen);
     #endif
   }
+}
+
+inline void lcd_save_previous_menu() {
+  prevMenu = currentMenu;
+  #if defined(ULTIPANEL)
+    prevEncoderPosition = encoderPosition;
+  #endif
+}
+
+static void lcd_goto_previous_menu() {
+  lcd_goto_menu(prevMenu, true
+    #if defined(ULTIPANEL)
+      , prevEncoderPosition
+    #endif
+  );
 }
 
 /* Main status screen. It's up to the implementation specific part to show what is needed. As this is very display dependent */
@@ -407,7 +426,7 @@ void lcd_set_home_offsets()
       lcdDrawUpdate = 1;
     }
     if (lcdDrawUpdate) lcd_implementation_drawedit(msg, "");
-    if (LCD_CLICKED) lcd_goto_menu(lcd_tune_menu);
+    if (LCD_CLICKED) lcd_goto_previous_menu();
   }
   static void lcd_babystep_x() { _lcd_babystep(X_AXIS, PSTR(MSG_BABYSTEPPING_X)); }
   static void lcd_babystep_y() { _lcd_babystep(Y_AXIS, PSTR(MSG_BABYSTEPPING_Y)); }
@@ -625,6 +644,7 @@ static void lcd_prepare_menu()
   #endif
 #endif
     MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
+/*
 #if PS_ON_PIN > -1
     if (powersupply)
     {
@@ -633,6 +653,7 @@ static void lcd_prepare_menu()
         MENU_ITEM(gcode, MSG_SWITCH_PS_ON, PSTR("M80"));
     }
 #endif
+*/
     MENU_ITEM(submenu, MSG_MOVE_AXIS, lcd_move_menu);
     END_MENU();
 }
@@ -657,8 +678,8 @@ static void _lcd_move(const char *name, int axis, int min, int max) {
     #endif
     lcdDrawUpdate = 1;
   }
-  if (lcdDrawUpdate) lcd_implementation_drawedit(name, ftostr31(current_position[axis]));
-  if (LCD_CLICKED) lcd_goto_menu(lcd_move_menu_axis);
+  if (lcdDrawUpdate) lcd_implementation_drawedit(name, ftostr52(current_position[axis]));
+  if (LCD_CLICKED) lcd_goto_previous_menu();
 }
 static void lcd_move_x() { _lcd_move(PSTR("X"), X_AXIS, X_MIN_POS, X_MAX_POS); }
 static void lcd_move_y() { _lcd_move(PSTR("Y"), Y_AXIS, Y_MIN_POS, Y_MAX_POS); }
@@ -682,7 +703,7 @@ static void lcd_move_e()
     {
         lcd_implementation_drawedit(PSTR("Extruder"), ftostr31(current_position[E_AXIS]));
     }
-    if (LCD_CLICKED) lcd_goto_menu(lcd_move_menu_axis);
+    if (LCD_CLICKED) lcd_goto_previous_menu();
 }
 
 static void lcd_move_menu_axis()
@@ -754,7 +775,7 @@ static void lcd_control_menu()
     MENU_ITEM(back, MSG_MAIN, lcd_main_menu);
     MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
     MENU_ITEM(submenu, MSG_MOTION, lcd_control_motion_menu);
-	MENU_ITEM(submenu, MSG_VOLUMETRIC, lcd_control_volumetric_menu);
+	  //MENU_ITEM(submenu, MSG_VOLUMETRIC, lcd_control_volumetric_menu);
 
 #ifdef DOGLCD
 //    MENU_ITEM_EDIT(int3, MSG_CONTRAST, &lcd_contrast, 0, 63);
@@ -872,7 +893,7 @@ static void lcd_control_motion_menu()
     MENU_ITEM_EDIT(float5, MSG_A_RETRACT, &retract_acceleration, 100, 99000);
     MENU_ITEM_EDIT(float52, MSG_XSTEPS, &axis_steps_per_unit[X_AXIS], 5, 9999);
     MENU_ITEM_EDIT(float52, MSG_YSTEPS, &axis_steps_per_unit[Y_AXIS], 5, 9999);
-    MENU_ITEM_EDIT(float51, MSG_ZSTEPS, &axis_steps_per_unit[Z_AXIS], 5, 9999);
+    MENU_ITEM_EDIT(float52, MSG_ZSTEPS, &axis_steps_per_unit[Z_AXIS], 5, 9999);
     MENU_ITEM_EDIT(float51, MSG_ESTEPS, &axis_steps_per_unit[E_AXIS], 5, 9999);
 #ifdef ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED
     MENU_ITEM_EDIT(bool, MSG_ENDSTOP_ABORT, &abort_on_endstop_hit);
@@ -920,7 +941,7 @@ static void lcd_set_contrast()
     {
         lcd_implementation_drawedit(PSTR(MSG_CONTRAST), itostr2(lcd_contrast));
     }
-    if (LCD_CLICKED) lcd_goto_menu(lcd_control_menu);
+    if (LCD_CLICKED) lcd_goto_previous_menu();
 }
 #endif
 
@@ -999,51 +1020,41 @@ void lcd_sdcard_menu()
 }
 
 #define menu_edit_type(_type, _name, _strFunc, scale) \
-    void menu_edit_ ## _name () \
-    { \
-        if ((int32_t)encoderPosition < 0) encoderPosition = 0; \
-        if ((int32_t)encoderPosition > maxEditValue) encoderPosition = maxEditValue; \
-        if (lcdDrawUpdate) \
-            lcd_implementation_drawedit(editLabel, _strFunc(((_type)((int32_t)encoderPosition + minEditValue)) / scale)); \
-        if (LCD_CLICKED) \
-        { \
-            *((_type*)editValue) = ((_type)((int32_t)encoderPosition + minEditValue)) / scale; \
-            lcd_goto_menu(prevMenu, prevEncoderPosition); \
-        } \
+  bool _menu_edit_ ## _name () { \
+    bool isClicked = LCD_CLICKED; \
+    if ((int32_t)encoderPosition < 0) encoderPosition = 0; \
+    if ((int32_t)encoderPosition > maxEditValue) encoderPosition = maxEditValue; \
+    if (lcdDrawUpdate) \
+      lcd_implementation_drawedit(editLabel, _strFunc(((_type)((int32_t)encoderPosition + minEditValue)) / scale)); \
+    if (isClicked) { \
+      *((_type*)editValue) = ((_type)((int32_t)encoderPosition + minEditValue)) / scale; \
+      lcd_goto_previous_menu(); \
     } \
-    void menu_edit_callback_ ## _name () { \
-        menu_edit_ ## _name (); \
-        if (LCD_CLICKED) (*callbackFunc)(); \
-    } \
-    static void menu_action_setting_edit_ ## _name (const char* pstr, _type* ptr, _type minValue, _type maxValue) \
-    { \
-        prevMenu = currentMenu; \
-        prevEncoderPosition = encoderPosition; \
-         \
-        lcdDrawUpdate = 2; \
-        currentMenu = menu_edit_ ## _name; \
-         \
-        editLabel = pstr; \
-        editValue = ptr; \
-        minEditValue = minValue * scale; \
-        maxEditValue = maxValue * scale - minEditValue; \
-        encoderPosition = (*ptr) * scale - minEditValue; \
-    }\
-    static void menu_action_setting_edit_callback_ ## _name (const char* pstr, _type* ptr, _type minValue, _type maxValue, menuFunc_t callback) \
-    { \
-        prevMenu = currentMenu; \
-        prevEncoderPosition = encoderPosition; \
-         \
-        lcdDrawUpdate = 2; \
-        currentMenu = menu_edit_callback_ ## _name; \
-         \
-        editLabel = pstr; \
-        editValue = ptr; \
-        minEditValue = minValue * scale; \
-        maxEditValue = maxValue * scale - minEditValue; \
-        encoderPosition = (*ptr) * scale - minEditValue; \
-        callbackFunc = callback;\
-    }
+    return isClicked; \
+  } \
+  void menu_edit_ ## _name () { _menu_edit_ ## _name(); } \
+  void menu_edit_callback_ ## _name () { if (_menu_edit_ ## _name ()) (*callbackFunc)(); } \
+  static void _menu_action_setting_edit_ ## _name (const char* pstr, _type* ptr, _type minValue, _type maxValue) { \
+    lcd_save_previous_menu(); \
+    \
+    lcdDrawUpdate = 2; \
+    currentMenu = menu_edit_ ## _name; \
+    \
+    editLabel = pstr; \
+    editValue = ptr; \
+    minEditValue = minValue * scale; \
+    maxEditValue = maxValue * scale - minEditValue; \
+    encoderPosition = (*ptr) * scale - minEditValue; \
+  } \
+  static void menu_action_setting_edit_ ## _name (const char* pstr, _type* ptr, _type minValue, _type maxValue) { \
+    _menu_action_setting_edit_ ## _name(pstr, ptr, minValue, maxValue); \
+    currentMenu = menu_edit_ ## _name; \
+  }\
+  static void menu_action_setting_edit_callback_ ## _name (const char* pstr, _type* ptr, _type minValue, _type maxValue, menuFunc_t callback) { \
+    _menu_action_setting_edit_ ## _name(pstr, ptr, minValue, maxValue); \
+    currentMenu = menu_edit_callback_ ## _name; \
+    callbackFunc = callback; \
+  }
 menu_edit_type(int, int3, itostr3, 1)
 menu_edit_type(float, float3, ftostr3, 1)
 menu_edit_type(float, float32, ftostr32, 100)
@@ -1099,8 +1110,8 @@ static void lcd_quick_feedback()
 }
 
 /** Menu action functions **/
-static void menu_action_back(menuFunc_t data) { lcd_goto_menu(data); }
-static void menu_action_submenu(menuFunc_t data) { lcd_goto_menu(data); }
+static void menu_action_back(menuFunc_t func) { lcd_goto_menu(func); }
+static void menu_action_submenu(menuFunc_t func) { lcd_save_previous_menu(); lcd_goto_menu(func); }
 static void menu_action_gcode(const char* pgcode) { enquecommand_P(pgcode); }
 static void menu_action_function(menuFunc_t data) { (*data)(); }
 static void menu_action_sdfile(const char* filename, char* longFilename)
