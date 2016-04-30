@@ -11,6 +11,14 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "BlinkM.cpp",
+			"settings":
+			{
+				"buffer_size": 557,
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -42,8 +50,17 @@
 		"side_bar_visible": false,
 		"status_bar_visible": false
 	},
+	"expanded_folders":
+	[
+		"/D/Arduino/Marlin-1.0.2-1_smartmaker"
+	],
 	"file_history":
 	[
+		"/C/Users/skefer/Documents/Arduino/Marlin-1.0.2-1_smartmaker/ultralcd.cpp",
+		"/C/Users/skefer/Documents/Arduino/Marlin-1.0.2-1_smartmaker/Configuration.h",
+		"/C/Users/skefer/Documents/Arduino/Marlin-1.0.2-1_smartmaker/language_en.h",
+		"/C/Users/skefer/Documents/Arduino/Marlin-1.0.2-1_smartmaker/language_an.h",
+		"/C/Users/skefer/Documents/Arduino/Marlin-1.0.2-1_smartmaker/Marlin_main.cpp",
 		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/blinkm.h",
 		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/boards.h",
 		"/E/jiankongwaike-ex_top.gcode",
@@ -166,12 +183,7 @@
 		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_SANGUINOLOLU_11.h",
 		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_SANGUINOLOLU_12.h",
 		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_SAV_MKI.h",
-		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_SETHI.h",
-		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_STB_11.h",
-		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_TEENSY2.h",
-		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_TEENSYLU.h",
-		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_ULTIMAIN_2.h",
-		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_ULTIMAKER.h"
+		"/C/Users/skefer/Documents/Arduino/Marlin-RC5_smartmaker_v1/pins_SETHI.h"
 	],
 	"find":
 	{
@@ -196,6 +208,46 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"thermistor ",
+			"EXTRUDE_MINTEMP ",
+			"lcd_preheat_pla0",
+			"PREHEAT_PLA",
+			"lcd_move_z",
+			"_lcd_move",
+			"lcd_move_z",
+			"move_z",
+			"lcd_goto_menu",
+			"lcd_goto_previous_menu",
+			"_lcd_move",
+			"lcd_move_z",
+			"move_z",
+			"prevMenu",
+			"lcd_goto_menu(prevMenu",
+			"lcd_set_contrast",
+			"lcd_goto_previous_menu",
+			"static void _menu_action_setting_edit_",
+			"lcd_save_previous_menu",
+			"prevMenu",
+			"lcd_goto_menu",
+			"prevMenu",
+			"lcd_status_screen",
+			"lcd_goto_previous_menu",
+			"_lcd_move",
+			"lcd_move_z",
+			"lcd_delta_calibrate_menu",
+			"calibration",
+			"MINTEMP",
+			"lcd_control_menu",
+			"MSG_CONTROL",
+			"Control",
+			"MSG_FILAMENTCHANGE",
+			"Filament",
+			"MSG_ZSTEPS",
+			"Zsteps",
+			"powersupply",
+			"MSG_SWITCH_PS_OFF",
+			"Switch power off",
+			"ready.",
 			"zprobe_zoffset",
 			"_lcd_move_zprobe",
 			"_lcd_auto_leving",
@@ -283,8 +335,7 @@
 			"0;",
 			"DELTA_CALIBRATION_MENU",
 			"delta_radius",
-			"EEPROM_OFFSET",
-			"loop"
+			"EEPROM_OFFSET"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -302,8 +353,40 @@
 	"groups":
 	[
 		{
+			"selected": 0,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "BlinkM.cpp",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 557,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -384,7 +467,7 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 279.0,
+	"side_bar_width": 275.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

@@ -410,6 +410,7 @@ void lcd_set_home_offsets()
     }
     plan_set_position(0.0, 0.0, 0.0, current_position[E_AXIS]);
 
+    enquecommand_P(PSTR("M500"));
     // Audio feedback
     enquecommand_P(PSTR("M300 S659 P200"));
     enquecommand_P(PSTR("M300 S698 P200"));
